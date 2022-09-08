@@ -267,3 +267,215 @@ circumference
 (defn fib'
   [n]
   (fib-iter 1 0 n))
+
+(defn first-denomination
+  [kinds-of-coins]
+  (cond
+    (= kinds-of-coins 1) 1
+    (= kinds-of-coins 2) 5
+    (= kinds-of-coins 3) 10
+    (= kinds-of-coins 4) 25
+    (= kinds-of-coins 5) 50))
+
+(defn cc
+  [amount kinds-of-coins]
+  (cond
+    (= amount 0) 1
+    (or (< amount 0) (= kinds-of-coins 0)) 0
+    :else (+ (cc amount
+                 (- kinds-of-coins 1))
+             (cc (- amount
+                    (first-denomination kinds-of-coins))
+                 kinds-of-coins))))
+(defn count-change
+  [amount]
+  (cc amount 5))
+
+(count-change 100)
+;; => 292
+
+(defn p
+  [x]
+  (- (* 3 x) (* 4 (cube x))))
+
+(defn sine
+  [angle]
+  (if (not (> (abs angle) 0.1))
+    angle
+    (p (sine (/ angle 3.0)))))
+
+(sine 12.15)
+;; => -0.39980345741334
+
+(sine 0.785) ;; sin 45
+;; => 0.707531343720907
+
+(defn expt
+  [b n]
+  (if (= n 0)
+    1
+    (* b (expt b (dec n)))))
+
+(defn expt-iter
+  [b counter product]
+  (if (= counter 0)
+    product
+    (expt-iter b
+               (dec counter)
+               (* b product))))
+
+(defn expt'
+  [b n]
+  (expt-iter b n 1))
+
+(defn fast-expt
+  [b n]
+  (cond
+    (= n 0) 1
+    (even? n) (square (fast-expt b (/ n 2)))
+    :else (* b (fast-expt b (dec n)))))
+
+(defn gcd
+  [a b]
+  (if (= b 0)
+    a
+    (gcd b (rem a b))))
+
+(gcd 20 16)
+;; => 4
+
+(defn divides?
+  [a b]
+  (= (rem b a) 0))
+
+(defn find-divisor
+  [n test-divisor]
+  (cond
+    (> (square test-divisor) n) n
+    (divides? test-divisor n) test-divisor
+    :else (find-divisor n (+ test-divisor 1))))
+
+(defn smallest-divisor
+  [n]
+  (find-divisor n 2))
+
+(defn prime?
+  [n]
+  (= n (smallest-divisor n)))
+
+(defn expmod
+  [base exp m]
+  (cond
+    (= exp 0) 1
+    (even? exp) (rem (square (expmod base (/ exp 2) m)) m)
+    :else (rem (* base (expmod base (- exp 1) m)) m)))
+
+(defn fermat-test
+  [n]
+  (letfn [(try-it [a]
+            (= (expmod a n n) a))]
+    (try-it (+ 1 (rand-int (dec n))))))
+
+(defn fast-prime?
+  [n times]
+  (cond
+    (= times 0) true
+    (fermat-test n) (fast-prime? n (- times 1))
+    :else false))
+
+(defn sum-integers
+  [a b]
+  (if (> a b)
+    0
+    (+ a (sum-integers (inc a) b))))
+
+(defn sum-cubes
+  [a b]
+  (if (> a b)
+    0
+    (+ (cube a)
+       (sum-cubes (inc a) b))))
+
+(defn pi-sum
+  [a b]
+  (if (> a b)
+    0
+    (+ (/ 1.0 (* a (+ a 2)))
+       (pi-sum (+ a 4) b))))
+
+(defn sum
+  [term a next b]
+  (if (> a b)
+    0
+    (+ (term a)
+       (sum term (next a) next b))))
+
+(defn sum-cubes'
+  [a b]
+  (sum cube a inc b))
+
+(sum-cubes' 1 10)
+;; => 3025
+
+(defn sum-integers'
+  [a b]
+  (sum identity a inc b))
+
+(sum-integers' 1 10)
+;; => 55
+
+(defn pi-sum'
+  [a b]
+  (letfn [(pi-term [x]
+            (/ 1.0 (* x (+ x 2))))
+          (pi-next [x]
+            (+ x 4))]
+    (sum pi-term a pi-next b)))
+
+(* 8 (pi-sum 1 1000))
+;; => 3.139592655589783
+
+(* 8 (pi-sum 1 10000))
+;; => 3.141392653591793
+
+(defn integral
+  [f a b dx]
+  (letfn [(add-dx [x]
+            (+ x dx))]
+    (* (sum f (+ a (/ dx 2.0)) add-dx b) dx)))
+
+(integral cube 0 1 0.01)
+;; => 0.24998750000000042
+
+(integral cube 0 1 0.001)
+;; => 0.249999875000001
+
+(defn pi-sum''
+  [a b]
+  (sum (fn [x] (/ 1.0 (* x (+ x 2))))
+       a
+       (fn [x] (+ x 4))
+       b))
+
+(defn integral'
+  [f a b dx]
+  (* (sum f
+          (+ a (/ dx 2.0))
+          (fn [x] (+ x dx))
+          b)
+     dx))
+
+(def plus4
+  (fn [x]
+    (+ x 4)))
+
+((fn [x y z] (+ x y (square z))) 1 2 3)
+;; => 12
+
+(defn f
+  [x y]
+  (let [a (+ 1 (* x y))
+        b (- 1 y)]
+    (+ (* x (square a))
+       (* y b)
+       (* a b))))
