@@ -129,3 +129,96 @@
   [x y]
   (mul-interval x (make-interval (/ 1.0 (upper-bound y))
                                  (/ 1.0 (lower-bound y)))))
+
+(def one-through-four (list 1 2 3 4))
+
+(defn list-ref
+  [items n]
+  (if (= n 0)
+    (first items)
+    (list-ref (rest items) (- n 1))))
+
+(def squares (list 1 4 9 16 25))
+
+(list-ref squares 3)
+;; => 16
+
+(defn length
+  [items]
+  (if (empty? items)
+    0
+    (+ 1 (length (rest items)))))
+
+(def odds (list 1 3 5 7))
+
+(length odds)
+;; => 4
+
+(defn length'
+  [items]
+  (letfn [(length-iter [a count]
+            (if (empty? a)
+              count
+              (length-iter (rest a) (+ 1 count))))]
+    (length-iter items 0)))
+
+(length' squares)
+;; => 5
+
+(defn append
+  [list1 list2]
+  (if (empty? list1)
+    list2
+    (cons (first list1) (append (rest list1) list2))))
+
+(append squares odds)
+;; => (1 4 9 16 25 1 3 5 7)
+
+
+(append odds squares)
+;; => (1 3 5 7 1 4 9 16 25)
+
+(defn last-pair
+  [items]
+  (if (empty? (rest items))
+    (first items)
+    (last-pair (rest items))))
+
+(last-pair (list 23 72 149 34))
+;; => 34
+
+(defn reverse'
+  [items]
+  (if (empty? items)
+    items
+    (into '() items)))
+
+(reverse' squares)
+;; => (25 16 9 4 1)
+
+(defn scale-list
+  [items factor]
+  (if (empty? items)
+    nil
+    (cons (* (first items) factor)
+          (scale-list (rest items) factor))))
+
+(scale-list (list 1 2 3 4 5) 10)
+;; => (10 20 30 40 50)
+
+(defn map'
+  [proc items]
+  (if (empty? items)
+    nil
+    (cons (proc (first items))
+          (map' proc (rest items)))))
+
+(map' ch01/abs (list -10 2.5 -11.6 17))
+;; => (10 2.5 11.6 17) 
+
+(map' (fn [x] (* x x)) (list 1 2 3 4))
+;; => (1 4 9 16)
+
+(defn scale-list'
+  [items factor]
+  (map' (fn [x] (* x factor)) items))
