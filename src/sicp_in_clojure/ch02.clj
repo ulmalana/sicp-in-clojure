@@ -222,3 +222,31 @@
 (defn scale-list'
   [items factor]
   (map' (fn [x] (* x factor)) items))
+
+(def x (cons (list 1 2) (list 3 4)))
+
+(defn pair?
+  [x]
+  (if (= 2 (length x))
+    true
+    false))
+
+(defn count-leaves
+  [x]
+  (cond
+    (empty? x) 0
+    (not (pair? x)) 1
+    :else (+ (count-leaves (first x))
+             (count-leaves (rest x)))))
+
+(length x)
+;; => 3
+
+(count-leaves x)
+;; => 1
+
+(length (list x x))
+;; => 2
+
+(count-leaves (list x x))
+;; => 2
