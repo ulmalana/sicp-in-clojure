@@ -223,30 +223,47 @@
   [items factor]
   (map' (fn [x] (* x factor)) items))
 
-(def x (cons (list 1 2) (list 3 4)))
+(def x (conj (list 3 4) (list 1 2)))
 
+;;;;;;;;;;;;;;;;;;;;;;;; DONT USE THIS ;;;;;;;;;;;;;;;;;;;
 (defn pair?
   [x]
-  (if (= 2 (length x))
+  (if (and (not (int? x)) (= 2 (length x)) (list? x))
     true
     false))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn count-leaves
   [x]
   (cond
-    (empty? x) 0
+    (nil? x) 0
     (not (pair? x)) 1
     :else (+ (count-leaves (first x))
              (count-leaves (rest x)))))
 
+;; modified version
+(defn count-leaves'
+  [x]
+  (if (seq? x)
+    (apply + (map count-leaves' x))
+    1))
+
 (length x)
 ;; => 3
 
-(count-leaves x)
-;; => 1
+(count-leaves' x)
+;; => 4
 
 (length (list x x))
 ;; => 2
 
-(count-leaves (list x x))
-;; => 2
+(count-leaves' (list x x))
+;; => 8
+
+(defn scale-tree
+  [tree factor]
+  (cond
+    (not (seq? tree)) (* tree factor)
+    (nil? tree) 1
+    :else (cons (scale-tree (first tree) factor)
+                (scale-tree (rest tree) factor))))
