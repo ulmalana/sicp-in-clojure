@@ -267,3 +267,78 @@
     (nil? tree) 1
     :else (cons (scale-tree (first tree) factor)
                 (scale-tree (rest tree) factor))))
+
+(defn filter'
+  [predicate coll]
+  (cond
+    (empty? coll) nil
+    (predicate (first coll)) (cons (first coll)
+                                 (filter' predicate (rest coll)))
+    :else (filter' predicate (rest coll))))
+;; => #'sicp-in-clojure.ch02/filter'
+
+(filter' odd? (list 1 2 3 4 5))
+;; => (1 3 5)
+
+(defn accumulate
+  [op initial coll]
+  (if (empty? coll)
+    initial
+    (op (first coll)
+        (accumulate op initial (rest coll)))))
+
+(accumulate + 0 (list 1 2 3 4 5))
+;; => 15
+
+(accumulate * 1 (list 1 2 3 4 5))
+;; => 120
+
+(accumulate cons nil (list 1 2 3 4 5))
+;; => (1 2 3 4 5)
+
+(defn enumerate-interval
+  [low high]
+  (if (> low high)
+    nil
+    (cons low (enumerate-interval (+ low 1) high))))
+
+(enumerate-interval 2 7)
+;; => (2 3 4 5 6 7)
+
+(defn list-fib-squares
+  [n]
+  (accumulate
+   cons
+   nil
+   (map ch01/square (map ch01/fib (enumerate-interval 0 n)))))
+
+(list-fib-squares 10)
+;; => (0 1 1 4 9 25 64 169 441 1156 3025)
+
+(defn product-of-squares-of-odd-elements
+  [coll]
+  (accumulate * 1 (map ch01/square (filter' odd? coll))))
+
+(product-of-squares-of-odd-elements (list 1 2 3 4 5))
+;; => 225
+
+(defn flatmap
+  [proc coll]
+  (accumulate append nil (map proc coll)))
+
+(defn remove'
+  [item coll]
+  (filter' (fn [x] (not (= x item)))
+           coll))
+
+(defn permutations
+  [s]
+  (if (empty? s)
+    (list nil)
+    (flatmap (fn [x]
+               (map (fn [p] (cons x p))
+                    (permutations (remove' x s))))
+             s)))
+
+(permutations '(1 2 3))
+;; => ((1 2 3) (1 3 2) (2 1 3) (2 3 1) (3 1 2) (3 2 1))
