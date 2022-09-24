@@ -1,4 +1,5 @@
 (ns sicp-in-clojure.ch02
+  ;;(:refer-clojure)
   (:require [sicp-in-clojure.ch01 :as ch01])
   (:gen-class))
 
@@ -342,3 +343,54 @@
 
 (permutations '(1 2 3))
 ;; => ((1 2 3) (1 3 2) (2 1 3) (2 3 1) (3 1 2) (3 2 1))
+
+(defn memq
+  [item x]
+  (cond
+    (empty? x) false
+    (= item (first x)) x
+    :else (memq item (rest x))))
+
+(defn variable?
+  [x]
+  (symbol? x))
+
+(defn same-variable?
+  [v1 v2]
+  (and (variable? v1) (variable? v2) (= v1 v2)))
+
+(defn make-sum
+  [a1 a2]
+  (list '+ a1 a2))
+
+(defn make-product
+  [m1 m2]
+  (list '* m1 m2))
+
+(defn sum?
+  [x]
+  (and (pair? x) (= (first x) '+)))
+
+(defn addend [s] (first (rest s)))
+
+(defn augend [s] (first (rest (rest s))))
+
+(defn product? [x] (and (pair? x) (= (first x) '*)))
+
+(defn multiplier [p] (first (rest p)))
+
+(defn multiplicand [p] (first (rest (rest p))))
+
+(defn deriv
+  [exp var]
+  (cond
+    (number? exp) 0
+    (variable? exp) (if (same-variable? exp var) 1 0)
+    (sum? exp) (make-sum (deriv (addend exp) var)
+                         (deriv (augend exp) var))
+    (product? exp) (make-sum
+                    (make-product (multiplier exp)
+                                  (deriv (multiplicand exp) var))
+                    (make-product (deriv (multiplier exp) var)
+                                  (multiplicand exp)))
+    :else (throw (Exception. (str "unknown expression type: DERIV" exp)) )))
