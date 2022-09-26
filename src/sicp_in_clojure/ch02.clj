@@ -394,3 +394,47 @@
                     (make-product (deriv (multiplier exp) var)
                                   (multiplicand exp)))
     :else (throw (Exception. (str "unknown expression type: DERIV" exp)) )))
+
+
+(defn element-of-set?
+  [x coll]
+  (cond
+    (empty? coll) false
+    (= x (first coll)) true
+    :else (element-of-set? x (rest coll))))
+
+(element-of-set? 1 '(3 4 1 2))
+;; => true
+
+(defn adjoin-set
+  [x coll]
+  (if (element-of-set? x coll)
+    coll
+    (cons x coll)))
+
+(defn intersection-set
+  [set1 set2]
+  (cond
+    (or (empty? set1) (empty? set2)) '()
+    (element-of-set? (first set1) set2) (cons (first set1) (intersection-set (rest set1) set2))
+    :else (intersection-set (rest set1) set2)))
+
+(defn element-of-ord-set?
+  [x coll]
+  (cond
+    (empty? coll) false
+    (= x (first coll)) true
+    (< x (first coll)) false
+    :else (element-of-ord-set? x (rest coll))))
+
+(defn intersection-ord-set
+  [set1 set2]
+  (if (or (empty? set1) (empty? set2))
+    '()
+    (let [x1 (first set1)
+          x2 (first set2)]
+      (cond
+        (= x1 x2) (cons x1 (intersection-ord-set (rest set1) (rest set2)))
+        (< x1 x2) (intersection-ord-set (rest set1) set2)
+        (< x2 x1) (intersection-ord-set set1 (rest set2))))))
+
